@@ -72,9 +72,11 @@ class Publisher(object):
         else:
             raise PublishError('content type needs to be "text" or "image"')
 
+        lock = self._pathtofile('publish.lock')
+
         if os.system(f'cp {content} {path}') != 0:
             raise PublishError('cp failed')
-        if os.system(f'git add {path} && git commit -m "{ctime()}"') != 0:
+        if os.system(f'git add {path} {lock} && git commit -m "{ctime()}"') != 0:
             raise PublishError('git failed')
         if remove:
             os.remove(content)
