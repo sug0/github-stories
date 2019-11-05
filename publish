@@ -128,11 +128,10 @@ def main():
 
     # parse the arguments (content)
     args = parser.parse_args()
-    path = args.content[0] if args.content else None
 
     # publish content
     p = Publisher()
-    p.publish(content=path)
+    p.publish(content=args.content)
 
 if __name__ == '__main__':
     main()
