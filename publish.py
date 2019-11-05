@@ -51,8 +51,13 @@ class Publisher(object):
     def __init__(self):
         self._date = None
 
-    def publish(self, content_path):
-        mime = magic.from_file(content_path, mime=1).split('/')
+    def publish(self, content=None):
+        if not content:
+            content = '.tmp'
+            if os.system('cat > .tmp') != 0:
+                raise PublishError('cat failed')
+
+        mime = magic.from_file(content, mime=1).split('/')
         path = None
 
         if mime[0] == 'text':
@@ -64,8 +69,8 @@ class Publisher(object):
         else:
             raise PublishError('content type needs to be "text" or "image"')
 
-        if os.system(f'cp {content_path} {path}') != 0:
-            raise PublishError('copy failed')
+        if os.system(f'cp {content} {path}') != 0:
+            raise PublishError('cp failed')
 
     def _getdate(self):
         if not self._date:
@@ -109,16 +114,16 @@ class Publisher(object):
 def main():
     # define CLI arguments
     parser = ArgumentParser(description='Publish new Github History.')
-    parser.add_argument('content', metavar='content', type=str, nargs=1,
+    parser.add_argument('content', metavar='content', type=str, nargs='?',
             help='The path to the content to publish.')
 
     # parse the arguments (content)
     args = parser.parse_args()
-    content = args.content[0]
+    path = args.content[0] if args.content else None
 
     # publish content
     p = Publisher()
-    p.publish(content)
+    p.publish(content=path)
 
 if __name__ == '__main__':
     main()
