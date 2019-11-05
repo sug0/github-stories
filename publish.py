@@ -3,8 +3,9 @@ import errno
 import fcntl
 import magic
 
-from datetime import date
+from argparse import ArgumentParser
 from itertools import chain
+from datetime import date
 from time import sleep
 
 class PublishError(Exception):
@@ -101,8 +102,18 @@ class Publisher(object):
         return os.sep.join(chain(it(dirpath), it(f)))
 
 def main():
+    # define CLI arguments
+    parser = ArgumentParser(description='Publish new Github History.')
+    parser.add_argument('content', metavar='content', type=str, nargs=1,
+            help='The path to the content to publish.')
+
+    # parse the arguments (content)
+    args = parser.parse_args()
+    content = args.content[0]
+
+    # publish content
     p = Publisher()
-    p.publish('publish.py')
+    p.publish(content)
 
 if __name__ == '__main__':
     main()
