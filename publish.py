@@ -8,6 +8,11 @@ from itertools import chain
 from datetime import date
 from time import sleep
 
+MONTH = ['',
+    'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+    'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+]
+
 class PublishError(Exception):
     pass
 
@@ -97,7 +102,7 @@ class Publisher(object):
                 else:
                     raise
         d = self._getdate()
-        dirpath = os.sep.join(chain(it(d['y']), it(d['m']), it(d['d'])))
+        dirpath = os.sep.join(chain(it(d['y']), it(MONTH[d['m']]), it(d['d'])))
         mkdir(dirpath)
         return os.sep.join(chain(it(dirpath), it(f)))
 
