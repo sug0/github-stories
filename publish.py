@@ -1,11 +1,14 @@
-import io
 import os
 import errno
 import fcntl
+import magic
 
 from datetime import date
 from itertools import chain
 from time import sleep
+
+class PublishError(Exception):
+    pass
 
 class LockedFile(object):
     def __init__(self, *args, **kwargs):
@@ -42,6 +45,22 @@ class Publisher(object):
     def __init__(self):
         self._date = None
 
+    def publish(self, content_path):
+        mime = magic.from_file(content_path, mime=1).split('/')
+        path = None
+
+        if mime[0] == 'text':
+            id = self._next_id()
+            path = self._pathtofile(f'{id}.txt')
+        elif mime[0] == 'image':
+            id = self._next_id()
+            path = self._pathtofile(f'{id}.{mime[1]}')
+        else:
+            raise PublishError('content type needs to be "text" or "image"')
+
+        if os.system(f'cp {content_path} {path}') != 0:
+            raise PublishError('copy failed')
+
     def _getdate(self):
         if not self._date:
             self._date = {}
@@ -51,7 +70,7 @@ class Publisher(object):
             self._date['d'] = d.day
         return self._date
 
-    def _nextpath(self):
+    def _next_id(self):
         lockpath = self._pathtofile('publish.lock')
         now = -1
         try:
@@ -83,7 +102,7 @@ class Publisher(object):
 
 def main():
     p = Publisher()
-    print(p._nextpath())
+    p.publish('publish.py')
 
 if __name__ == '__main__':
     main()
